@@ -56,6 +56,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       if (response.success) {
+        // Wait a bit for Supabase to finalize user creation
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         // After successful registration, log them in
         await login({ email: data.email, password: data.password });
       } else {
@@ -104,15 +107,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await apiClient(API_ENDPOINTS.auth.logout, {
         method: 'POST',
       });
-      setUser(null);
-      router.push('/login');
     } catch (err) {
       console.error('Logout error:', err);
-      // Even if the API call fails, clear local state
-      setUser(null);
-      router.push('/login');
     } finally {
+      // Clear all storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Clear user state
+      setUser(null);
+      setError(null);
+      
       setLoading(false);
+      router.push('/login');
     }
   };
 

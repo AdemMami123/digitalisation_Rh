@@ -4,6 +4,7 @@ import {
   login,
   logout,
   forgotPassword,
+  resetPassword,
   getCurrentUser,
   refreshToken
 } from '../controllers/auth.controller';
@@ -38,6 +39,13 @@ router.post('/logout', logout);
  * @access  Public
  */
 router.post('/forgot-password', forgotPassword);
+
+/**
+ * @route   POST /api/auth/reset-password
+ * @desc    Reset password with token
+ * @access  Public
+ */
+router.post('/reset-password', resetPassword);
 
 /**
  * @route   GET /api/auth/me

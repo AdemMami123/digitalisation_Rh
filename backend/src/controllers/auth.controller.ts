@@ -50,7 +50,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         data: {
           full_name: full_name || '',
           role: role || UserRole.USER
-        }
+        },
+        emailRedirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/login`
       }
     });
 
@@ -309,6 +310,56 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
     res.status(500).json({
       success: false,
       message: 'An error occurred while fetching user data.'
+    });
+  }
+};
+
+/**
+ * Reset password with token
+ * POST /api/auth/reset-password
+ */
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      res.status(400).json({
+        success: false,
+        message: 'Token and new password are required.'
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long.'
+      });
+      return;
+    }
+
+    // Verify the reset token and update password via Supabase
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      res.status(400).json({
+        success: false,
+        message: error.message || 'Invalid or expired reset token.'
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Password has been reset successfully.'
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while resetting password.'
     });
   }
 };
