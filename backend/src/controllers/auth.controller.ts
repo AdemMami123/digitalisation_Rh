@@ -147,10 +147,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       console.error('Profile fetch error:', profileError);
     }
 
+    console.log('[Login] User profile from database:', userProfile);
+
     // Determine user role (from profile or metadata)
     const userRole = userProfile?.role || 
                      authData.user.user_metadata?.role || 
                      UserRole.USER;
+
+    console.log('[Login] Final user role:', userRole);
+    console.log('[Login] userProfile?.role:', userProfile?.role);
+    console.log('[Login] authData.user.user_metadata?.role:', authData.user.user_metadata?.role);
 
     // Create JWT payload
     const payload: JWTPayload = {
@@ -279,6 +285,8 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
       return;
     }
 
+    console.log('[getCurrentUser] JWT user data:', req.user);
+
     // Fetch full user profile from database
     const { data: userProfile, error } = await supabase
       .from('users')
@@ -294,6 +302,8 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
       });
       return;
     }
+
+    console.log('[getCurrentUser] Database user profile:', userProfile);
 
     res.status(200).json({
       success: true,

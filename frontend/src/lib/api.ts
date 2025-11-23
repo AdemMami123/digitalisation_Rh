@@ -52,4 +52,11 @@ export const API_ENDPOINTS = {
     forgotPassword: '/api/auth/forgot-password',
     refresh: '/api/auth/refresh',
   },
+  formations: {
+    list: '/api/formations',
+    create: '/api/formations',
+    get: (id: string) => `/api/formations/${id}`,
+    update: (id: string) => `/api/formations/${id}`,
+    delete: (id: string) => `/api/formations/${id}`,
+  },
 } as const;

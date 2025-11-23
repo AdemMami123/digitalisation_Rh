@@ -16,6 +16,7 @@ import {
   Bell,
 } from 'lucide-react';
 import { UserRole } from '@/types/auth';
+import { useRouter } from 'next/navigation';
 
 const container = {
   hidden: { opacity: 0 },
@@ -34,8 +35,15 @@ const item = {
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const isRH = user?.role === UserRole.RH;
+
+  // Debug logging
+  console.log('[Dashboard] User:', user);
+  console.log('[Dashboard] User role:', user?.role);
+  console.log('[Dashboard] UserRole.RH:', UserRole.RH);
+  console.log('[Dashboard] isRH:', isRH);
 
   const stats = [
     {
@@ -74,12 +82,13 @@ export default function DashboardPage() {
 
   const quickActions = isRH
     ? [
-        { label: 'Créer une formation', icon: GraduationCap, href: '#' },
+        { label: 'Créer une formation', icon: GraduationCap, href: '/dashboard/formations/create' },
+        { label: 'Gérer les formations', icon: GraduationCap, href: '/dashboard/formations' },
         { label: 'Ajouter un document', icon: FileText, href: '#' },
         { label: 'Gérer les utilisateurs', icon: Users, href: '#' },
       ]
     : [
-        { label: 'Mes formations', icon: GraduationCap, href: '#' },
+        { label: 'Mes formations', icon: GraduationCap, href: '/dashboard/formations' },
         { label: 'Documents', icon: FileText, href: '#' },
         { label: 'Mon profil', icon: User, href: '#' },
       ];
@@ -190,10 +199,11 @@ export default function DashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {quickActions.map((action, index) => (
                     <motion.button
                       key={index}
+                      onClick={() => router.push(action.href)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className="flex items-center gap-3 p-4 border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
@@ -201,7 +211,7 @@ export default function DashboardPage() {
                       <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                         <action.icon className="w-5 h-5 text-primary" />
                       </div>
-                      <span className="font-medium">{action.label}</span>
+                      <span className="font-medium text-left">{action.label}</span>
                     </motion.button>
                   ))}
                 </div>

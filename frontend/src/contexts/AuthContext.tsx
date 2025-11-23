@@ -30,15 +30,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
+      console.log('[AuthContext] Checking authentication...');
       const response = await apiClient<AuthResponse>(API_ENDPOINTS.auth.me);
+      console.log('[AuthContext] Auth response:', response);
       if (response.success && response.user) {
+        console.log('[AuthContext] User authenticated:', response.user.email);
         setUser(response.user);
+      } else {
+        console.log('[AuthContext] No user in response');
+        setUser(null);
       }
     } catch (err) {
       // User not authenticated, that's okay
+      console.log('[AuthContext] Auth check failed:', err);
       setUser(null);
     } finally {
       setLoading(false);
+      console.log('[AuthContext] Auth check completed');
     }
   };
 
