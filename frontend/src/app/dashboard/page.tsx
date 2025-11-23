@@ -4,16 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard,
   Users,
   FileText,
   GraduationCap,
-  LogOut,
-  User,
-  Settings,
   Bell,
+  User as UserIcon,
 } from 'lucide-react';
 import { UserRole } from '@/types/auth';
 import { useRouter } from 'next/navigation';
@@ -34,7 +30,7 @@ const item = {
 };
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   const isRH = user?.role === UserRole.RH;
@@ -90,53 +86,12 @@ export default function DashboardPage() {
     : [
         { label: 'Mes formations', icon: GraduationCap, href: '/dashboard/formations' },
         { label: 'Documents', icon: FileText, href: '#' },
-        { label: 'Mon profil', icon: User, href: '#' },
+        { label: 'Mon profil', icon: UserIcon, href: '/dashboard/profile' },
       ];
 
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-        {/* Header */}
-        <motion.header
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          transition={{ type: 'spring', stiffness: 100 }}
-          className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm"
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                  <LayoutDashboard className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold">Tableau de bord</h1>
-                  <p className="text-sm text-muted-foreground">
-                    Plateforme de Formation RH
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="text-right">
-                  <p className="text-sm font-medium">{user?.full_name || user?.email}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {isRH ? 'Administrateur RH' : 'Collaborateur'}
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => logout()}
-                  className="flex items-center gap-2"
-                >
-                  <LogOut size={16} />
-                  Déconnexion
-                </Button>
-              </div>
-            </div>
-          </div>
-        </motion.header>
-
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Welcome Message */}

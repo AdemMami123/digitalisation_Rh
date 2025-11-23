@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Calendar, Clock, MapPin, Link as LinkIcon, Pencil, Trash2, GraduationCap } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Plus, Calendar, Clock, MapPin, Link as LinkIcon, Pencil, Trash2, GraduationCap, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Formation, FormationType } from '@/types/formation';
@@ -17,6 +18,8 @@ function FormationsContent() {
   const [formations, setFormations] = useState<Formation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     loadFormations();
@@ -249,7 +252,10 @@ function FormationsContent() {
                       <Button
                         variant="outline"
                         className="w-full mt-4"
-                        onClick={() => router.push(`/dashboard/formations/${formation.id}`)}
+                        onClick={() => {
+                          setSelectedFormation(formation);
+                          setIsDialogOpen(true);
+                        }}
                       >
                         Voir les détails
                       </Button>
@@ -261,6 +267,137 @@ function FormationsContent() {
           </div>
         )}
       </div>
+
+      {/* Formation Details Modal */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          {selectedFormation && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <DialogTitle className="text-2xl font-bold mb-2">
+                      {selectedFormation.titre}
+                    </DialogTitle>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeBadgeColor(selectedFormation.type)}`}>
+                        {getTypeLabel(selectedFormation.type)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-6">
+                {/* Description */}
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-2">Description</h3>
+                  <p className="text-base leading-relaxed">{selectedFormation.description}</p>
+                </div>
+
+                {/* Objectifs pédagogiques */}
+                {selectedFormation.objectifs_pedagogiques && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                      Objectifs pédagogiques
+                    </h3>
+                    <p className="text-base leading-relaxed whitespace-pre-line">
+                      {selectedFormation.objectifs_pedagogiques}
+                    </p>
+                  </div>
+                )}
+
+                {/* Informations pratiques */}
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                    Informations pratiques
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <GraduationCap className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Formateur</p>
+                        <p className="font-medium">{selectedFormation.formateur}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Calendar className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Date prévue</p>
+                        <p className="font-medium">{formatDate(selectedFormation.date_prevue)}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Clock className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Durée</p>
+                        <p className="font-medium">{selectedFormation.duree} heures</p>
+                      </div>
+                    </div>
+
+                    {selectedFormation.lieu && (
+                      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                        <MapPin className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Lieu</p>
+                          <p className="font-medium">{selectedFormation.lieu}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedFormation.lien && (
+                      <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                        <LinkIcon className="h-5 w-5 text-primary" />
+                        <div className="flex-1">
+                          <p className="text-xs text-muted-foreground">Lien de formation</p>
+                          <a
+                            href={selectedFormation.lien}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-primary hover:underline break-all"
+                          >
+                            {selectedFormation.lien}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action buttons for RH */}
+                {user?.role === 'RH' && (
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                        router.push(`/dashboard/formations/${selectedFormation.id}/edit`);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Modifier
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={() => {
+                        setIsDialogOpen(false);
+                        handleDelete(selectedFormation.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Supprimer
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
